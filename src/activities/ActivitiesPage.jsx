@@ -30,3 +30,4 @@ export default function ActivitiesPage() {
     </div>
   );
 }
+console.log("API URL:", import.meta.env.VITE_API);
