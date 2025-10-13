@@ -1,26 +1,32 @@
 import { useState, useEffect } from "react";
 import { getActivities } from "../api/activities";
-
 import ActivityList from "./ActivityList";
-import ActivityForm from "./ActivityForm";
 
 export default function ActivitiesPage() {
   const [activities, setActivities] = useState([]);
-
-  const syncActivities = async () => {
-    const data = await getActivities();
-    setActivities(data);
-  };
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    syncActivities();
+    async function fetchActivities() {
+      try {
+        const data = await getActivities();
+        setActivities(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      }
+    }
+
+    fetchActivities();
   }, []);
 
+  if (error) return <p role="alert">{error}</p>;
+  if (!activities.length) return <p>Loading activities...</p>;
+
   return (
-    <>
-      <h1>Activities</h1>
-      <ActivityList activities={activities} syncActivities={syncActivities} />
-      <ActivityForm syncActivities={syncActivities} />
-    </>
+    <div>
+      <h2>Activities</h2>
+      <ActivityList activities={activities} />
+    </div>
   );
 }

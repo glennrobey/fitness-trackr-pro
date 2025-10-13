@@ -1,43 +1,56 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import { usePage } from "../layout/PageContext";
 
 /** A form that allows users to log into an existing account. */
 export default function Login() {
   const { login } = useAuth();
-  const { setPage } = usePage();
+  const navigate = useNavigate();
 
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
 
-  const tryLogin = async (formData) => {
+  async function handleSubmit(e) {
+    e.preventDefault();
     setError(null);
 
-    const username = formData.get("username");
-    const password = formData.get("password");
     try {
-      await login({ username, password });
-      setPage("activities");
-    } catch (e) {
-      setError(e.message);
+      await login(username, password);
+      navigate("/activities"); // redirect after successful login
+    } catch (err) {
+      setError(err.message);
     }
-  };
+  }
 
   return (
-    <>
-      <h1>Log in to your account</h1>
-      <form action={tryLogin}>
+    <div>
+      <h2>Login</h2>
+      {error && <p role="alert">{error}</p>}
+      <form onSubmit={handleSubmit}>
         <label>
-          Username
-          <input type="text" name="username" required />
+          Username:
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
         </label>
         <label>
-          Password
-          <input type="password" name="password" required />
+          Password:
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </label>
-        <button>Login</button>
-        {error && <p role="alert">{error}</p>}
+        <button type="submit">Log In</button>
       </form>
-      <a onClick={() => setPage("register")}>Need an account? Register here.</a>
-    </>
+
+      <p>
+        Don’t have an account? <Link to="/register">Register here</Link>
+      </p>
+    </div>
   );
 }

@@ -1,57 +1,59 @@
 const API = import.meta.env.VITE_API;
 
-/** Fetches an array of activities from the API. */
+/** Fetch all activities */
 export async function getActivities() {
   try {
-    const response = await fetch(API + "/activities");
-    const result = await response.json();
-    return result;
-  } catch (e) {
-    console.error(e);
+    const res = await fetch(`${API}/activities`);
+    if (!res.ok) throw new Error("Failed to fetch activities");
+    return await res.json();
+  } catch (err) {
+    console.error(err);
     return [];
   }
 }
 
-/**
- * Sends a new activity to the API to be created.
- * A valid token is required.
- */
-export async function createActivity(token, activity) {
-  if (!token) {
-    throw Error("You must be signed in to create an activity.");
+/** Fetch a single activity by ID */
+export async function getActivity(id) {
+  try {
+    const res = await fetch(`${API}/activities/${id}`);
+    if (!res.ok) throw new Error("Failed to fetch activity");
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    throw err;
   }
+}
 
-  const response = await fetch(API + "/activities", {
+/** Create a new activity */
+export async function createActivity(token, activity) {
+  if (!token) throw new Error("You must be signed in to create an activity");
+
+  const res = await fetch(`${API}/activities`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(activity),
   });
 
-  if (!response.ok) {
-    const result = await response.json();
-    throw Error(result.message);
+  if (!res.ok) {
+    const result = await res.json();
+    throw new Error(result.message || "Failed to create activity");
   }
 }
 
-/**
- * Requests the API to delete the activity with the given ID.
- * A valid token is required.
- */
+/** Delete an activity */
 export async function deleteActivity(token, id) {
-  if (!token) {
-    throw Error("You must be signed in to delete an activity.");
-  }
+  if (!token) throw new Error("You must be signed in to delete an activity");
 
-  const response = await fetch(API + "/activities/" + id, {
+  const res = await fetch(`${API}/activities/${id}`, {
     method: "DELETE",
-    headers: { Authorization: "Bearer " + token },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
-  if (!response.ok) {
-    const result = await response.json();
-    throw Error(result.message);
+  if (!res.ok) {
+    const result = await res.json();
+    throw new Error(result.message || "Failed to delete activity");
   }
 }
