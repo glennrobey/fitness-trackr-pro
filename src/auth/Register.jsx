@@ -1,46 +1,50 @@
 import { useState } from "react";
-import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
 
-  const tryRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-
-    const formData = new FormData(e.target);
-    const username = formData.get("username");
-    const password = formData.get("password");
-
     try {
       await register({ username, password });
-      navigate("/activities");
-    } catch (e) {
-      setError(e.message);
+      navigate("/activities"); // redirect after successful registration
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   return (
-    <>
-      <h1>Register for an account</h1>
-      <form onSubmit={tryRegister}>
+    <div>
+      <h2>Register</h2>
+      {error && <p role="alert">{error}</p>}
+      <form onSubmit={handleSubmit}>
         <label>
-          Username
-          <input type="text" name="username" required />
+          Username:
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
         </label>
         <label>
-          Password
-          <input type="password" name="password" required />
+          Password:
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="new-password"
+          />
         </label>
         <button type="submit">Register</button>
-        {error && <p role="alert">{error}</p>}
       </form>
-      <button onClick={() => navigate("/login")}>
-        Already have an account? Log in here.
-      </button>
-    </>
+    </div>
   );
 }
